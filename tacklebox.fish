@@ -97,6 +97,65 @@ function __tacklebox_append_path --no-scope-shadowing --description \
     end
 end
 
+function __tacklebox_load_env_file --no-scope-shadowing --description \
+        'Load and export all values in a env file'
+    # Loop through lines of .env file
+    for line in (cat $argv[1])
+        # If line starts with # presume it is empty or if its empty ignore it
+        if test (string sub -s 1 -l 1 $line) != "#" -a -n $line
+            # Check that string contains either exactly 1 = or exactly 1 ' '
+            if string match -q "*=*" $line
+                if not string match -q "*=*=*" $line
+                    set -l split (string split = $line)
+                    # Using the following does not work as it does not substitute the path
+                    # Setting the PATH with read breaks
+                    printf "%s" (eval "echo $split[2]") | read -l $split[1]
+                else
+                    echo "Invalid line not added to environment: $line"
+                end
+            else if string match -q "* *" $line
+                if not string match -q "* * *" $line
+                    # Using the following does not work as it does not substitute the path
+                    # set -x $split[1] $split[2]
+                    set -x $split[1] (eval echo "$split[2]")
+            else
+                    echo "Invalid line not added to environment: $line"
+                end
+            else
+                echo "Invalid line not added to environment: $line"
+            end
+        end
+    end
+end
+
+function __tacklebox_unload_env_file --no-scope-shadowing --description \
+        'Clears all environment variables loaded in a env file'
+        # Loop through lines of .env file
+        for line in (cat $argv[1])
+            # If line starts with # presume it is empty or if its empty ignore it
+            if test (string sub -s 1 -l 1 $line) != "#" -a -n $line
+                # Check that string contains either exactly 1 = or exactly 1 ' '
+                if string match -q "*=*" $line
+                    if not string match -q "*=*=*" $line
+                        set -l split (string split = $line)
+                        set -ex $split[1]
+                    else
+                        # echo "Invalid line not added to environment: $line"
+                    end
+                else if string match -q "* *" $line
+                    if not string match -q "* * *" $line
+                        set -l split (string split ' ' $line)
+                        set -ex $split[1]
+                    else
+                        echo "Invalid line not added to environment: $line"
+                    end
+                else
+                    echo "Invalid line not added to environment: $line"
+                end
+            end
+        end
+end
+
 ###
 # Configuration
 ###
@@ -109,6 +168,13 @@ set -g fish_function_path "$__fish_datadir/functions"
 # Add all functions
 for repository in $tacklebox_path[-1..1]
     __tacklebox_prepend_path $repository/functions fish_function_path
+end
+
+# Load Environment
+for repository in $tacklebox_path[-1..1]
+    for env_file in $repository/*.env
+        __tacklebox_load_env_file $env_file
+    end
 end
 
 # Add all specified plugins
