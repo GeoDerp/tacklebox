@@ -111,13 +111,12 @@ function __tacklebox_load_env_file --no-scope-shadowing --description \
                     # Setting the PATH with read breaks
                     if test $split[1] != PATH
                         # need to expand $split[2] twice so that any vars stored in the file get expanded
-                        
-                        echo $split[2]  | read -x echo $split[1]
+                        set -l TMP "echo $split[2]"
+                        printf "%s" (eval $TMP) | read -x $split[1]
                     else
                         # Fish handles PATH specially and must be handled specially
                         # Handle : or ' ' seperation of paths as thats what people expect
-                        string replace '$PATH' $PATH $split[2] | string join ' ' | string replace -a ':' ' ' | read -l TMP
-                        echo "::$PATH::$TMP::"
+                        string replace '$PATH' (string join ' ' $PATH) $split[2] | string join ' ' | string replace -a ':' ' ' | read -l TMP
                         set -x PATH (string split ' ' $TMP)
                     end
                 else
