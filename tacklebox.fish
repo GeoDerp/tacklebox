@@ -109,7 +109,17 @@ function __tacklebox_load_env_file --no-scope-shadowing --description \
                     set -l split (string split = $line)
                     # Using the following does not work as it does not substitute the path
                     # Setting the PATH with read breaks
-                    printf "%s" (eval "echo $split[2]") | read -l $split[1]
+                    if test $split[1] != PATH
+                        # need to expand $split[2] twice so that any vars stored in the file get expanded
+                        
+                        echo $split[2]  | read -x echo $split[1]
+                    else
+                        # Fish handles PATH specially and must be handled specially
+                        # Handle : or ' ' seperation of paths as thats what people expect
+                        string replace '$PATH' $PATH $split[2] | string join ' ' | string replace -a ':' ' ' | read -l TMP
+                        echo "::$PATH::$TMP::"
+                        set -x PATH (string split ' ' $TMP)
+                    end
                 else
                     echo "Invalid line not added to environment: $line"
                 end
