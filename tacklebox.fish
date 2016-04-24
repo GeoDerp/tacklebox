@@ -122,14 +122,6 @@ function __tacklebox_load_env_file --no-scope-shadowing --description \
                 else
                     echo "Invalid line not added to environment: $line"
                 end
-            else if string match -q "* *" $line
-                if not string match -q "* * *" $line
-                    # Using the following does not work as it does not substitute the path
-                    # set -x $split[1] $split[2]
-                    set -x $split[1] (eval echo "$split[2]")
-            else
-                    echo "Invalid line not added to environment: $line"
-                end
             else
                 echo "Invalid line not added to environment: $line"
             end
