@@ -100,6 +100,7 @@ end
 function __tacklebox_load_env_file --no-scope-shadowing --description \
         'Load and export all values in a env file'
     # Loop through lines of .env file
+    set -l retVal 0
     if test -r $argv[1]
         while read line;
             # Strip all comments from lines
@@ -126,14 +127,17 @@ function __tacklebox_load_env_file --no-scope-shadowing --description \
                     end
                 else
                     echo "Invalid line not added to environment: $line"
+                    set -l retVal 1
                 end
             end
         ; end < $argv[1]
     end
+    return $retVal
 end
 
 function __tacklebox_unload_env_file --no-scope-shadowing --description \
         'Clears all environment variables loaded in a env file'
+    set -l retVal 0
     # Loop through lines of .env file
     if test -r $argv[1]
         while read line;
@@ -147,10 +151,12 @@ function __tacklebox_unload_env_file --no-scope-shadowing --description \
                     set -ex $split[1]
                 else
                     echo "Invalid line not removed from environment: $line"
+                    set -l retVal 1
                 end
             end
         ; end < $argv[1]
     end
+    return $retVal
 end
 
 ###
