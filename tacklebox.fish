@@ -100,61 +100,57 @@ end
 function __tacklebox_load_env_file --no-scope-shadowing --description \
         'Load and export all values in a env file'
     # Loop through lines of .env file
-    for line in (cat $argv[1])
-        # If line starts with # presume it is empty or if its empty ignore it
-        if test (string sub -s 1 -l 1 $line) != "#" -a -n $line
-            # Check that string contains either exactly 1 = or exactly 1 ' '
-            if string match -q "*=*" $line
-                if not string match -q "*=*=*" $line
-                    set -l split (string split = $line)
+    if test -r $argv[1]
+        while read line;
+            # Strip all comments from lines
+            string replace -r '#.*' '' $line | read -l line
+            # Skip empty lines
+            if test -n $line
+                if string match -q "*=*" $line
+                    set -l split (string split -m 1 = $line)
                     # Using the following does not work as it does not substitute the path
                     # Setting the PATH with read breaks
                     if test $split[1] != PATH
                         # need to expand $split[2] twice so that any vars stored in the file get expanded
-                        set -l TMP "echo $split[2]"
+                        set -l TMP "echo -e \"$split[2]\""
                         printf "%s" (eval $TMP) | read -x $split[1]
                     else
                         # Fish handles PATH specially and must be handled specially
                         # Handle : or ' ' seperation of paths as thats what people expect
-                        string replace '$PATH' (string join ' ' $PATH) $split[2] | string join ' ' | string replace -a ':' ' ' | read -l TMP
+                        string replace '$PATH' "$PATH" $split[2] | string join ' ' | string replace -a ':' ' ' | read -l TMP
+                        # Make the PATH only contain unique entries, 
+                        # split the list into lines, number each one, sort by the 
+                        # original data, uniq, sort by line number then remove line numbers
+                        string replace -a \n $TMP | nl | sort -k 2 | uniq -f 1 | sort -n | sed 's/\s*[0-9]\+\s\+//' | read -l TMP
                         set -x PATH (string split ' ' $TMP)
                     end
                 else
                     echo "Invalid line not added to environment: $line"
                 end
-            else
-                echo "Invalid line not added to environment: $line"
             end
-        end
+        ; end < $argv[1]
     end
 end
 
 function __tacklebox_unload_env_file --no-scope-shadowing --description \
         'Clears all environment variables loaded in a env file'
-        # Loop through lines of .env file
-        for line in (cat $argv[1])
-            # If line starts with # presume it is empty or if its empty ignore it
-            if test (string sub -s 1 -l 1 $line) != "#" -a -n $line
+    # Loop through lines of .env file
+    if test -r $argv[1]
+        while read line;
+            # Strip all comments from lines
+            string replace -r '#.*' '' $line | read -l line
+            # Skip empty lines
+            if test -n $line
                 # Check that string contains either exactly 1 = or exactly 1 ' '
                 if string match -q "*=*" $line
-                    if not string match -q "*=*=*" $line
-                        set -l split (string split = $line)
-                        set -ex $split[1]
-                    else
-                        # echo "Invalid line not added to environment: $line"
-                    end
-                else if string match -q "* *" $line
-                    if not string match -q "* * *" $line
-                        set -l split (string split ' ' $line)
-                        set -ex $split[1]
-                    else
-                        echo "Invalid line not added to environment: $line"
-                    end
+                    set -l split (string split -m 1 = $line)
+                    set -ex $split[1]
                 else
-                    echo "Invalid line not added to environment: $line"
+                    echo "Invalid line not removed from environment: $line"
                 end
             end
-        end
+        ; end < $argv[1]
+    end
 end
 
 ###
@@ -171,10 +167,12 @@ for repository in $tacklebox_path[-1..1]
     __tacklebox_prepend_path $repository/functions fish_function_path
 end
 
-# Load Environment
-for repository in $tacklebox_path[-1..1]
-    for env_file in $repository/*.env
-        __tacklebox_load_env_file $env_file
+# Load Environment - This requires fish 2.3 with the string builtin
+if type -q string
+    for repository in $tacklebox_path[-1..1]
+        for env_file in $repository/*.env
+            __tacklebox_load_env_file $env_file
+        end
     end
 end
 
