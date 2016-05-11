@@ -49,6 +49,9 @@ function __tacklebox_load_theme
     set -l theme_path "themes/$theme"
 
     for repository in $tacklebox_path[-1..1]
+        if test -d $repository/$theme_path
+            __tacklebox_load_env_files_in_dir $repository/$theme_path
+        end
         __tacklebox_prepend_path $repository/$theme_path fish_function_path
     end
 end
@@ -159,6 +162,15 @@ function __tacklebox_unload_env_file --no-scope-shadowing --description \
     return $retVal
 end
 
+function __tacklebox_load_env_files_in_dir --no-scope-shadowing --description \
+        'Loads all the .env files in the directory passed in.'
+    if test -d $argv[1]
+        for env_file in $argv[1]/*.env
+            __tacklebox_load_env_file $env_file
+        end
+    end
+end
+
 ###
 # Configuration
 ###
@@ -176,9 +188,7 @@ end
 # Load Environment - This requires fish 2.3 with the string builtin
 if type -q string
     for repository in $tacklebox_path[-1..1]
-        for env_file in $repository/*.env
-            __tacklebox_load_env_file $env_file
-        end
+        __tacklebox_load_env_files_in_dir $repository
     end
 end
 
