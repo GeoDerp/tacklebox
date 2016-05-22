@@ -117,7 +117,7 @@ function __tacklebox_load_env_file --no-scope-shadowing --description \
                     if test $split[1] != PATH
                         # need to expand $split[2] twice so that any vars stored in the file get expanded
                         set -l TMP "echo -e \"$split[2]\""
-                        printf "%s" (eval $TMP) | read -x $split[1]
+                        printf "%s" (eval $TMP) | read -gx $split[1]
                     else
                         # Fish handles PATH specially and must be handled specially
                         # Handle : or ' ' seperation of paths as thats what people expect
@@ -126,7 +126,7 @@ function __tacklebox_load_env_file --no-scope-shadowing --description \
                         # split the list into lines, number each one, sort by the 
                         # original data, uniq, sort by line number then remove line numbers
                         string replace -a \n $TMP | nl | sort -k 2 | uniq -f 1 | sort -n | sed 's/\s*[0-9]\+\s\+//' | read -l TMP
-                        set -x PATH (string split ' ' $TMP)
+                        set -gx PATH (string split ' ' $TMP)
                     end
                 else
                     echo "Invalid line not added to environment: $line"
