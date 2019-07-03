@@ -70,6 +70,7 @@ function __tacklebox_prepend_path --no-scope-shadowing --description \
         'Prepend the given path, if it exists, to the specified path list (defaults to PATH)'
     set -l path "$argv[1]"
     set -l list PATH
+
     if set -q argv[2]
         set list $argv[2]
     end
@@ -80,7 +81,9 @@ function __tacklebox_prepend_path --no-scope-shadowing --description \
         if set -l idx (contains -i -- $path $$list)
             set -e -- {$list}[$idx]
         end
-        set -- $list $path $$list
+        #set -- $list $path $$list
+        set -p  $argv[2] $path
+
     end
 end
 
@@ -95,7 +98,7 @@ function __tacklebox_append_path --no-scope-shadowing --description \
     if test -d $path
         # If the path is already in the list, skip it.
         if not contains -- $path $$list
-            set -- $list $$list $path
+            set -a $argv[2] $path
         end
     end
 end
@@ -116,17 +119,29 @@ function __tacklebox_load_env_file --no-scope-shadowing --description \
                     # Setting the PATH with read breaks
                     if test $split[1] != PATH
                         # need to expand $split[2] twice so that any vars stored in the file get expanded
-                        set -l TMP "echo -e \"$split[2]\""
-                        printf "%s" (eval $TMP) | read -gx $split[1]
+                        set -l content ""
+                        for arg in $split[2]
+                            # See if the argument starts with a "$" and remove it at the same time
+                            if set -l varname (string replace -rf '^\$' '' -- $arg)
+                                set content (echo -n "$content $$varname") # this expands it first to "$PATH", and then expands _that_, to leave the value of $PATH.
+                            else
+                                set content (echo -n "$content $arg")
+                            end
+                        end
+                        set -l TMP (string trim $content)
+                        set -l TMP2 "/usr/bin/echo -e $TMP"
+                        set -l TMP3 (string split ' ' $TMP2)
+                        set -l TMP4 ($TMP3)
+                        printf "%s" $TMP4 | read -gx $split[1]
                     else
                         # Fish handles PATH specially and must be handled specially
                         # Handle : or ' ' seperation of paths as thats what people expect
                         string replace '$PATH' "$PATH" $split[2] | string join ' ' | string replace -a ':' ' ' | read -l TMP
-                        # Make the PATH only contain unique entries, 
-                        # split the list into lines, number each one, sort by the 
+                        # Make the PATH only contain unique entries,
+                        # split the list into lines, number each one, sort by the
                         # original data, uniq, sort by line number then remove line numbers
-                        string replace -a \n $TMP | nl | sort -k 2 | uniq -f 1 | sort -n | sed 's/\s*[0-9]\+\s\+//' | read -l TMP
-                        set -gx PATH (string split ' ' $TMP)
+                        # string replace -a \n $TMP | nl | sort -k 2 | uniq -f 1 | sort -n | sed 's/\s*[0-9]\+\s\+//' | read -l TMP
+                        # set -gx PATH (string split ' ' $TMP)
                     end
                 else
                     echo "Invalid line not added to environment: $line"
@@ -151,7 +166,7 @@ function __tacklebox_unload_env_file --no-scope-shadowing --description \
                 # Check that string contains either exactly 1 = or exactly 1 ' '
                 if string match -q "*=*" $line
                     set -l split (string split -m 1 = $line)
-                    set -ex $split[1]
+                    set -e $split[1]
                 else
                     echo "Invalid line not removed from environment: $line"
                     set -l retVal 1
@@ -186,10 +201,8 @@ for repository in $tacklebox_path[-1..1]
 end
 
 # Load Environment - This requires fish 2.3 with the string builtin
-if type -q string
-    for repository in $tacklebox_path[-1..1]
-        __tacklebox_load_env_files_in_dir $repository
-    end
+for repository in $tacklebox_path[-1..1]
+    __tacklebox_load_env_files_in_dir $repository
 end
 
 # Add all specified plugins
@@ -209,6 +222,7 @@ if test -n "$tacklebox_theme"
     __tacklebox_load_theme $tacklebox_theme
 end
 
+
 # Add back the user and sysconf functions as appropriate
 for path in $fish_function_path
     # don't append either system path
@@ -216,8 +230,10 @@ for path in $fish_function_path
         __tacklebox_append_path $path user_function_path
     end
 end
+
+
 if __tacklebox_strip_word "$__fish_sysconfdir/functions" user_function_path
     set user_function_path $user_function_path "$__fish_sysconfdir/functions"
 end
 __tacklebox_strip_word "$__fish_datadir/functions" user_function_path
-set -g fish_function_path $user_function_path "$__fish_datadir/functions"
+set -ga fish_function_path $user_function_path "$__fish_datadir/functions"
