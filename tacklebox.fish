@@ -120,7 +120,7 @@ function __tacklebox_load_env_file --no-scope-shadowing --description \
                     if test $split[1] != PATH
                         # need to expand $split[2] twice so that any vars stored in the file get expanded
                         set -l content ""
-                        for arg in $split[2]
+                        for arg in (string split " " $split[2])
                             # See if the argument starts with a "$" and remove it at the same time
                             if set -l varname (string replace -rf '^\$' '' -- $arg)
                                 set content (echo -n "$content $$varname") # this expands it first to "$PATH", and then expands _that_, to leave the value of $PATH.
@@ -136,12 +136,20 @@ function __tacklebox_load_env_file --no-scope-shadowing --description \
                     else
                         # Fish handles PATH specially and must be handled specially
                         # Handle : or ' ' seperation of paths as thats what people expect
-                        string replace '$PATH' "$PATH" $split[2] | string join ' ' | string replace -a ':' ' ' | read -l TMP
-                        # Make the PATH only contain unique entries,
-                        # split the list into lines, number each one, sort by the
-                        # original data, uniq, sort by line number then remove line numbers
-                        # string replace -a \n $TMP | nl | sort -k 2 | uniq -f 1 | sort -n | sed 's/\s*[0-9]\+\s\+//' | read -l TMP
-                        # set -gx PATH (string split ' ' $TMP)
+                        set -l content ""
+                        for arg in (string split " " $split[2])
+                            # See if the argument starts with a "$" and remove it at the same time
+                            if set -l varname (string replace -rf '^\$' '' -- $arg)
+                                set content (echo -n "$content $$varname") # this expands it first to "$PATH", and then expands _that_, to leave the value of $PATH.
+                            else
+                                set content (echo -n "$content $arg")
+                            end
+                        end
+
+
+                        # $PATH is : seperated so split it back to spaces.
+                        string trim $content | string join ' ' | string replace -a ':' ' ' | read -l content
+                        set -gx PATH (string split ' ' $content)
                     end
                 else
                     echo "Invalid line not added to environment: $line"
