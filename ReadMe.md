@@ -68,6 +68,7 @@ These are not official terms by any means — just useful concepts to help under
 * *component* — a module, plugin, or theme
 * *module* - files that are *sourced* (e.g., `virtualfish`)
 * *plugin* - dynamically-loaded functions (e.g., `up`)
+* *environment* - environment variables to be loaded
 * *theme* - functions to customize appearance of the shell prompt
 
 Plugins are composed of one or more files, each of which usually contains a function that matches the file name — otherwise, the function will not be dynamically loaded (and thus must be sourced instead).
@@ -76,10 +77,11 @@ While dynamically-loaded functions are preferred, there are some situations in w
 
 ## Customization
 
-Can't find a plugin that does what you want? Prefer to create your own theme? Tacklebox includes locations for you to store your own customized modules, plugins, and themes:
+Can't find a plugin that does what you want? Prefer to create your own theme? Tacklebox includes locations for you to store your own customized modules, plugins, environment, and themes:
 
 * `~/.tacklebox/modules/`
 * `~/.tacklebox/plugins/`
+* `~/.tacklebox/environment/`
 * `~/.tacklebox/themes/`
 
 Remember that adding your custom components at the above locations isn't sufficient — you must enable them by including them in your `tacklebox_modules`, `tacklebox_plugins`, and/or `tacklebox_theme` settings, in addition to including `~/.tacklebox` itself in your `tacklebox_path` setting.
