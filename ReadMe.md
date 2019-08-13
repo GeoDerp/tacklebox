@@ -17,6 +17,8 @@ This fork differs from the [Original Tacklebox][] by [Justin Mayer][], in that i
 
 Contributions are welcome here via pull requests, although I am also cherry picking any contributions from [Justin Mayer][]'s repository.
 
+In addition my [tackle][] repository contains some extra features beyond the original.
+
 ## Installation
 
 ### Manual installation
@@ -77,7 +79,7 @@ While dynamically-loaded functions are preferred, there are some situations in w
 
 ## Customization
 
-Can't find a plugin that does what you want? Prefer to create your own theme? Tacklebox includes locations for you to store your own customized modules, plugins, environment, and themes:
+Can't find a plugin that does what you want? Prefer to create your own theme? Tacklebox includes locations for you to store your own customized modules, plugins, environment, and themes although it is encouraged that you store your config in [tackle][] rather then these locations directly:
 
 * `~/.tacklebox/modules/`
 * `~/.tacklebox/plugins/`
