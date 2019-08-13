@@ -212,7 +212,7 @@ end
 
 # Load Environment - This requires fish 2.3 with the string builtin
 for repository in $tacklebox_path[-1..1]
-    __tacklebox_load_env_files_in_dir $repository
+    __tacklebox_load_env_files_in_dir $repository/environment
 end
 
 # Add all specified plugins
