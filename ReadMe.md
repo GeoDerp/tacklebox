@@ -79,18 +79,7 @@ While dynamically-loaded functions are preferred, there are some situations in w
 
 ## Customization
 
-Can't find a plugin that does what you want? Prefer to create your own theme? Tacklebox includes locations for you to store your own customized modules, plugins, environment, and themes although it is encouraged that you store your config in [tackle][] rather then these locations directly:
-
-* `~/.tacklebox/modules/`
-* `~/.tacklebox/plugins/`
-* `~/.tacklebox/environment/`
-* `~/.tacklebox/themes/`
-
-Remember that adding your custom components at the above locations isn't sufficient — you must enable them by including them in your `tacklebox_modules`, `tacklebox_plugins`, and/or `tacklebox_theme` settings, in addition to including `~/.tacklebox` itself in your `tacklebox_path` setting.
-
-If you would rather keep your collection of custom goodies in your own versioned repository instead of the directories provided by Tacklebox, just create your own repository at your preferred filesystem location and prepend its path to the `tacklebox_path` list.
-
-Have a very simple function that you don't necessarily feel is worthy of creating a plugin? Put it in `~/.config/fish/functions/[your-function-name].fish`, creating the parent directory if it doesn't already exist.
+[tackle][] is the best place to store and customize your tacklebox setup. So you can read about it further there.
 
 ## Contributing
 
