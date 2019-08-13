@@ -1,7 +1,7 @@
 The MIT License
 
 Copyright (c) Justin Mayer <http://justinmayer.com/>,
-              Bruno Ferreira Pinto, and contributors
+              Bruno Ferreira Pinto, Simon Lees and contributors
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
