@@ -12,29 +12,22 @@ Fish's design philosophy is to avoid including the kitchen sink and only bundle 
 
 Tacklebox solves this problem by allowing you to utilize community-curated repositories, enabling only those tools that are relevant to your desired workflow.
 
+## This fork
+This fork differs from the [Original Tacklebox][] by [Justin Mayer][], in that it adds the ability to load environment files from the environment directory as well as theme related environment variables from the theme's directory.
+
+Contributions are welcome here via pull requests, although I am also cherry picking any contributions from [Justin Mayer][]'s repository.
+
 ## Installation
-
-Assuming Fish 2.0+ is already installed, the following will install Tacklebox and [Tackle][]:
-
-    curl -O https://raw.githubusercontent.com/justinmayer/tacklebox/master/tools/install.fish
-    cat install.fish  # inspect contents to ensure you understand what it’s doing
-    cat install.fish | fish; rm install.fish
-
-Alternatively, if you aware of the potential security concern with piping directly to shell, you can perform the installation in one step:
-
-    curl -L https://raw.githubusercontent.com/justinmayer/tacklebox/master/tools/install.fish | fish
-
-You can now skip to the **Usage** section below.
 
 ### Manual installation
 
 If you prefer to install manually, the first step is to clone the Tacklebox repository:
 
-    git clone https://github.com/justinmayer/tacklebox ~/.tacklebox
+    git clone https://github.com/simotek/tacklebox ~/.tacklebox
 
 To install external repositories, first clone them to your desired location. For example, you can clone the [Tackle][] repository via:
 
-    git clone https://github.com/justinmayer/tackle ~/.tackle
+    git clone https://github.com/simotek/tackle ~/.tackle
 
 Don't like those locations? Clone them wherever you want. Just keep in mind that the instructions below assume those locations, so modify them as needed.
 
@@ -115,4 +108,6 @@ That's not a question, but you can still put `*.load` files inside plugins if yo
 
 [Fish]: http://fishshell.com/
 [contributing guidelines]: https://github.com/justinmayer/tacklebox/blob/master/Contributing.md
-[Tackle]: https://github.com/justinmayer/tackle
+[Original Tacklebox]: https://github.com/justinmayer/tacklebox
+[Tackle]: https://github.com/simotek/tackle
+[Justin Mayer]: http://justinmayer.com/
